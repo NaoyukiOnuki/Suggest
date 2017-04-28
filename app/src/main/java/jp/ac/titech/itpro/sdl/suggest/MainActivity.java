@@ -27,10 +27,26 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputText;
     private ArrayAdapter<String> resultAdapter;
 
+    private final static String KEY_RESULT = "MainActivity.result";
+    private ArrayList<String> result = null;
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList(KEY_RESULT, result);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (savedInstanceState != null) {
+            result = savedInstanceState.getStringArrayList(KEY_RESULT);
+        }
+        if (result != null) {
+            handler.sendMessage(handler.obtainMessage(MSG_RESULT, result));
+        }
 
         inputText = (EditText)findViewById(R.id.input_text);
         Button suggestButton = (Button)findViewById(R.id.suggest_button);
@@ -65,8 +81,9 @@ public class MainActivity extends AppCompatActivity {
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
             case MSG_RESULT:
+                result = (ArrayList<String>)msg.obj;
                 resultAdapter.clear();
-                resultAdapter.addAll((List<String>)msg.obj);
+                resultAdapter.addAll(result);
                 resultAdapter.notifyDataSetChanged();
                 inputText.selectAll();
                 break;
